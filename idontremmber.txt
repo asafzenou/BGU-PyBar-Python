@@ -1,0 +1,13 @@
+groups = sorted(groups, reverse=True)        
+for table_dict in shift.get_table_list(shift):
+            self.hostess_tables_organization[table_dict] = Table.get_max_capacity(table_dict)
+
+        tables = sorted(self.hostess_tables_organization,key=lambda x: x[1])
+
+        for a_group in groups:
+            for a_table in tables:
+                if a_group <= a_table.value():
+                    print(f"{Group.get_customer_list(a_group)} you can seat on table {a_table.key()} please.")
+                    print(Table.seat(a_table.key(), a_group))
+                    break
+            print(f"Sorry {Group.get_customer_list(a_group)}, we don't have place for {len(a_group)} people .")

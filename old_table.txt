@@ -1,0 +1,108 @@
+import Group
+from Group import *
+
+
+class Table:
+    def __init__(self, number, max_capacity=None):
+        self.number = number
+        self.max_capacity = max_capacity
+        self.tables_organization = {}
+        self.group = None  # Group.get_customer_list?
+        self.saved_order = {}
+        self.bill = {}
+
+
+        if (not isinstance(number, int)) or (not isinstance(max_capacity, int)) or (max_capacity < 0) or (number < 0):
+            raise InvalidInputException("Invalid input. Number and max_capacity most be int and more then 0.")
+
+    def __str__(self):
+        return f"Table number {self.number} has {self.max_capacity} seats."
+
+    def __repr__(self):
+        return Table.__str__
+
+    def __len__(self):
+        return self.max_capacity
+
+    def __lt__(self, other):
+        return len(self) < len(other)
+
+    def is_empty(self):
+        if self.number not in self.tables_organization:  # If It's empty, max_capacity > 0
+            return True
+        else:
+            if self.tables_organization[self.number] is None:
+                return True
+            else:
+                return False
+
+    def get_max_capacity(self):
+        return self.max_capacity
+
+    def seat(self, group):
+        # check_len_of_group = (self.group[0], self.group[1])
+        group_list = group.get_customer_list()
+        check_len_of_group = len(group_list)  # Group.__len__(self.group)
+        for key in self.tables_organization.keys():  # Checks if the table is taken
+            if key in self.tables_organization.keys() or key:  # if None
+                raise OccupiedTableException("Occupied table")
+        if not isinstance(group, Group):  # most be type Group.
+            raise InvalidInputException("Invalid input, group most be a type from Group class")
+        if check_len_of_group > self.max_capacity:  # len(self.group[0])
+            raise TooSmallTableException("Too small table")
+        self.saved_order = group  #maybe wrong
+        self.tables_organization[self.number] = group.get_order # { number : {order:cost,...}}
+
+
+    def order(self, menu):
+        if not isinstance(menu, dict):
+            raise InvalidInputException("Invalid input, menu must be a dict.")
+        if self.number not in self.tables_organization.keys():  # If number not in the order dictonery
+            raise EmptyTableException("Empty table")
+        table_order = Group.get_order_dict()
+        for product in table_order.keys():  # self.tables_organization[self.number]
+            check_in_menu = 0
+            for menu_product in menu.keys():
+                if product == menu_product:
+                    check_in_menu += 1
+            if check_in_menu == 0:
+                print(f"Sorry we don't have {product}.\n")
+            if check_in_menu > 0:
+                self.bill[product] = check_in_menu * menu[product]
+        print("Your bill is:\n")
+        for key, val in menu.items():
+            print(f"{key}..........{val}")
+
+    def pay(self):
+        if self.number not in self.tables_organization.keys():
+            raise EmptyTableException("The table is empty")
+        payment = 0
+        for val in self.bill.values():
+            payment += val
+        amount_of_dinners = len(self.group)    # Group.__len__()
+        split_bill = payment / amount_of_dinners
+        collect_tip = 0
+        for cus_tip in Group.get_customer_list():
+            cus_tip = cus_tip.get_cus_tip() * split_bill
+            collect_tip += cus_tip
+        self.tables_organization[self.number] = None
+        return payment, round(collect_tip, 3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
